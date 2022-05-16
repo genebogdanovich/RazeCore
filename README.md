@@ -1,2 +1,3 @@
 # RazeCore
-A reusable framework that allows me to share code across apps.
+
+A description of this package.
