@@ -16,7 +16,7 @@ class NetworkSessionMock: NetworkingSession {
     }
     
     func post(with request: URLRequest, completionHandler: @escaping (Data?, Error?) -> Void) {
-        <#code#>
+        completionHandler(data, error)
     }
     
 }
@@ -68,7 +68,7 @@ final class RazeNetworkingTests: XCTestCase {
                 XCTAssertEqual(returnedObject, sampleObject)
                 break
             case .failure(let error):
-                XCTFail(error.localizedDescription ?? "error forming error result")
+                XCTFail(error?.localizedDescription ?? "error forming error result")
             }
         }
         wait(for: [expectation], timeout: 5)
