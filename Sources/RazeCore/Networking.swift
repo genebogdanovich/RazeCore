@@ -9,9 +9,17 @@ import Foundation
 
 protocol NetworkingSession {
     func get(from url: URL, completionHandler: @escaping (Data?, Error?) -> Void)
+    func post(with request: URLRequest, completionHandler: @escaping (Data?, Error?) -> Void)
 }
 
 extension URLSession: NetworkingSession {
+    func post(with request: URLRequest, completionHandler: @escaping (Data?, Error?) -> Void) {
+        let task = dataTask(with: request) { data, _, error in
+            completionHandler(data, error)
+        }
+        task.resume()
+    }
+    
     func get(from url: URL, completionHandler: @escaping (Data?, Error?) -> Void) {
         let task = dataTask(with: url) { data, _, error in
             completionHandler(data, error)
@@ -42,6 +50,29 @@ extension RazeCore {
                     let result = data.map(NetworkResult<Data>.success) ?? .failure(error)
                     completionHandler(result)
                     
+                }
+            }
+            
+            /// Calls the live internet to send data to a specific location.
+            /// - Warning: Make sure the URL in question can accept a POST route
+            /// - Parameters:
+            ///   - url: The location you wish to send data to
+            ///   - body: The object that you wish to send over the internet
+            ///   - completionHandler: Returns a result object which signifies the status of the request
+            public func sendData<I: Codable>(to url: URL, body: I, completionHandler: @escaping (NetworkResult<Data>) -> Void) {
+                var request = URLRequest(url: url)
+                do {
+                    let httpBody = try JSONEncoder().encode(body)
+                    request.httpBody = httpBody
+                    request.httpMethod = "POST"
+                    session.post(with: request) { data, error in
+                        let result = data.map(NetworkResult<Data>.success) ?? .failure(error)
+                        completionHandler(result)
+                        
+                    }
+                    
+                } catch {
+                    completionHandler(.failure(error))
                 }
             }
         }
